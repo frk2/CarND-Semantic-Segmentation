@@ -78,7 +78,9 @@ def gen_batch_function(data_folder, image_shape):
         background_color = np.array([255, 0, 0])
 
         random.shuffle(image_paths)
+
         for batch_i in range(0, len(image_paths), batch_size):
+            should_flip = np.random.randint(2) == 1
             images = []
             gt_images = []
             for image_file in image_paths[batch_i:batch_i+batch_size]:
@@ -90,6 +92,10 @@ def gen_batch_function(data_folder, image_shape):
                 gt_bg = np.all(gt_image == background_color, axis=2)
                 gt_bg = gt_bg.reshape(*gt_bg.shape, 1)
                 gt_image = np.concatenate((gt_bg, np.invert(gt_bg)), axis=2)
+
+                if (should_flip):
+                    image = np.fliplr(image)
+                    gt_image = np.fliplr(gt_image)
 
                 images.append(image)
                 gt_images.append(gt_image)
