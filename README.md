@@ -20,6 +20,9 @@ Help with the above would be great!
 ## Performance
 The FCN works kind of okay - Its not accurate enough to be used for safety reasons but its kinda cool that it can classify pixels with so little training data. How can this be made better?
 
+![alt text](runs/1504733785.7155836/um_000002.png "Road1")
+![alt text](runs/1504733785.7155836/um_000010.png "Road1")
+
 
 ## Things that didnt help
 - Freezing the VGG16 layers. This makes everything quite bad.
