@@ -1,36 +1,28 @@
 # Semantic Segmentation
-### Introduction
-In this project, you'll label the pixels of a road in images using a Fully Convolutional Network (FCN).
+Extremely fun project! We got to train a FCN using a pretrained VGG16 with fine tuning.
 
-### Setup
-##### Frameworks and Packages
-Make sure you have the following is installed:
- - [Python 3](https://www.python.org/)
- - [TensorFlow](https://www.tensorflow.org/)
- - [NumPy](http://www.numpy.org/)
- - [SciPy](https://www.scipy.org/)
-##### Dataset
-Download the [Kitti Road dataset](http://www.cvlibs.net/datasets/kitti/eval_road.php) from [here](http://www.cvlibs.net/download.php?file=data_road.zip).  Extract the dataset in the `data` folder.  This will create the folder `data_road` with all the training a test images.
+## Model
+The FCN model is laid out as defined in: https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf
 
-### Start
-##### Implement
-Implement the code in the `main.py` module indicated by the "TODO" comments.
-The comments indicated with "OPTIONAL" tag are not required to complete.
-##### Run
-Run the following command to run the project:
-```
-python main.py
-```
-**Note** If running this in Jupyter Notebook system messages, such as those regarding test status, may appear in the terminal rather than the notebook.
+I used a tf.truncated_normal_initializer() for initializing the kernels of all the conv layers. This helped the predictions be WAY less noisy than otherwise. 
 
-### Submission
-1. Ensure you've passed all the unit tests.
-2. Ensure you pass all points on [the rubric](https://review.udacity.com/#!/rubrics/989/view).
-3. Submit the following in a zip file.
- - `helper.py`
- - `main.py`
- - `project_tests.py`
- - Newest inference images from `runs` folder
- 
- ## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+Trained for 50 epochs with a batch size of 16. The epoch was chosen primarily so that our gen_batches function has enough room to deliver 384 * 2 (augmentation) = 768 images
+
+## Augmentation
+I extended the gen_batches function to generate flipped data to augment our existing dataset. This primarily helped get around shadows being a dead zone problem!
+
+## Caveats / Improvements
+- The paper talks about using a bilinear interpolation kernel initializer for the FCN32 - unclear how we do this in tensorflow! I could use the lower level tf.nn.conv2d api but then I miss out on the regularizers? 
+- The paper also recommends using 'The new parameters acting on pool4 are zeroinitialized so that the net starts with unmodified predictions' - Are they talking about the upsample kernel initializers or the initializers on the 1x1 convnets here?
+
+Help with the above would be great!
+
+## Performance
+The FCN works kind of okay - Its not accurate enough to be used for safety reasons but its kinda cool that it can classify pixels with so little training data. How can this be made better?
+
+
+## Things that didnt help
+- Freezing the VGG16 layers. This makes everything quite bad.
+- Using a zero initializer on the conv nets - the truncated normal initializer works just as well and makes more sense in my head
+- Using more epochs - probably just overfit
+
