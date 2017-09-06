@@ -97,18 +97,20 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # vgg_layer3_out = tf.stop_gradient(vgg_layer3_out)
     # vgg_layer4_out = tf.stop_gradient(vgg_layer4_out)
     # vgg_layer7_out = tf.stop_gradient(vgg_layer7_out)
-    conv1x1 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, 1, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    kinit = tf.truncated_normal_initializer(stddev=0.01)
+    conv1x1 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, 1, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3), kernel_initializer=kinit)
 
-    up2x = tf.layers.conv2d_transpose(conv1x1, num_classes, 4, 2, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    up2x = tf.layers.conv2d_transpose(conv1x1, num_classes, 4, 2, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3), kernel_initializer=kinit)
     # TODO: Implement function
 
-    vgg_layer4_conv1x1 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, 1, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3), kernel_initializer=tf.zeros_initializer())
-    skip1 = tf.add(up2x, vgg_layer4_conv1x1)
-    up2xagain =  tf.layers.conv2d_transpose(skip1, num_classes, 4, 2, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
-    vgg_layer3_conv1x1 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, 1, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3), kernel_initializer=tf.zeros_initializer())
+    vgg_layer4_conv1x1 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, 1, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3), kernel_initializer=kinit)
+    skip1 = tf.add(up2x, vgg_layer4_conv1x1)
+    up2xagain =  tf.layers.conv2d_transpose(skip1, num_classes, 4, 2, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3), kernel_initializer=kinit)
+
+    vgg_layer3_conv1x1 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, 1, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3), kernel_initializer=kinit)
     skip2 = tf.add(up2xagain, vgg_layer3_conv1x1)
-    up8x = tf.layers.conv2d_transpose(skip2, num_classes, 16, 8, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3) )
+    up8x = tf.layers.conv2d_transpose(skip2, num_classes, 16, 8, padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3), kernel_initializer=kinit)
     #up8x = tf.Print(up8x, [tf.shape(up8x)])
     return up8x
 tests.test_layers(layers)
@@ -178,7 +180,7 @@ def run():
         get_batches_fn = helper.gen_batch_function(os.path.join(data_dir, 'data_road/training'), image_shape)
         input, keep_prob, layer3, layer4, layer7 =  load_vgg(sess, vgg_path)
         output = layers(layer3, layer4, layer7, num_classes)
-        logits, train_op, cle = optimize(output, correct_label, 0.001, num_classes)
+        logits, train_op, cle = optimize(output, correct_label, 0.0001, num_classes)
         saver = tf.train.Saver()
         train_nn(sess, 50, 16, get_batches_fn, train_op, cle, input, correct_label, keep_prob, 0.001)
         saver.save(sess,'out')
