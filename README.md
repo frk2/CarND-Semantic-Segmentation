@@ -6,7 +6,7 @@ The FCN model is laid out as defined in: https://people.eecs.berkeley.edu/~jonlo
 
 I used a tf.truncated_normal_initializer() for initializing the kernels of all the conv layers. This helped the predictions be WAY less noisy than otherwise. 
 
-Trained for 50 epochs with a batch size of 16. The epoch was chosen primarily so that our gen_batches function has enough room to deliver 384 * 2 (augmentation) = 768 images
+Trained for 50 epochs with a batch size of 16 and a tiny LR of 0.0001. The epoch was chosen primarily so that our gen_batches function has enough room to deliver 384 * 2 (augmentation) = 768 images
 
 ## Augmentation
 I extended the gen_batches function to generate flipped data to augment our existing dataset. This primarily helped get around shadows being a dead zone problem!
